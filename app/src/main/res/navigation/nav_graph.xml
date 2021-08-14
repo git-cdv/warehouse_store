@@ -12,11 +12,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/loginFragment"
-        android:name="com.chkan.warehouse_store.login.LoginFragment"
-        android:label="fragment_login"
-        tools:layout="@layout/fragment_login"/>
-    <fragment
         android:id="@+id/salesFragment"
         android:name="com.chkan.warehouse_store.SalesFragment"
         android:label="SalesFragment" />
