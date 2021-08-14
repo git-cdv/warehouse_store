@@ -8,5 +8,5 @@ data class Product (
     val name: String = "",
     val imageUrl: String = "",
     val category: String = "",
-    val quantity: Int = 0
+    val quantity: String = ""
 ) : Parcelable

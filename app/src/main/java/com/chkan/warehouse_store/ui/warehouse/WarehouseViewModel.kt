@@ -18,15 +18,15 @@ class WarehouseViewModel : ViewModel() {
     val products : LiveData<List<Product>> = _products
 
     init {
-        //getProducts()
+        getProducts()
     }
 
     private fun getProducts() {
         //TODO запускаем статус бар лоадера
 
-        var productsList = listOf<Product>(Product("Prestige Серая, 22 л", "https://mommys.com.ua/image/cache/catalog/Prestige/24-100x100.jpg", "Сумки",4),
-            Product("Cube Геометрия, 13 л", "https://mommys.com.ua/image/cache/catalog/CubeSum/sumka_dlya_mam_cuberomb_000-100x100.jpg", "Bags",2),
-            Product("Ahong Лисички, 22 л", "https://mommys.com.ua/image/cache/catalog/Fun/9135644580_251991099-100x100.jpg", "Bags",0))
+        val productsList = listOf<Product>(Product("Prestige Серая, 22 л", "https://mommys.com.ua/image/cache/catalog/Prestige/24-100x100.jpg", "Сумки","4"),
+            Product("Cube Геометрия, 13 л", "https://mommys.com.ua/image/cache/catalog/CubeSum/sumka_dlya_mam_cuberomb_000-100x100.jpg", "Bags","2"),
+            Product("Ahong Лисички, 22 л", "https://mommys.com.ua/image/cache/catalog/Fun/9135644580_251991099-100x100.jpg", "Bags","0"))
         _products.value = productsList
 
         //TODO здесь получаем список Товаров через FirestoreClass и применяем его ливдате через трай кетч
