@@ -1,9 +1,14 @@
 package com.chkan.warehouse_store.ui.warehouse
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.chkan.warehouse_store.models.Product
+import com.chkan.warehouse_store.utils.Constans
+import com.google.firebase.database.*
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 /**
  * ViewModel отвечает за выполнение сетевого вызова для получения данных.
@@ -16,6 +21,8 @@ class WarehouseViewModel : ViewModel() {
     //для хранения списка товаров
     private val _products = MutableLiveData<List<Product>>()
     val products : LiveData<List<Product>> = _products
+    private val db: FirebaseDatabase = Firebase.database
+    private val database: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
 
     init {
         getProducts()
@@ -24,11 +31,24 @@ class WarehouseViewModel : ViewModel() {
     private fun getProducts() {
         //TODO запускаем статус бар лоадера
 
-        val productsList = listOf<Product>(Product("Prestige Серая, 22 л", "https://mommys.com.ua/image/cache/catalog/Prestige/24-100x100.jpg", "Сумки","4"),
-            Product("Cube Геометрия, 13 л", "https://mommys.com.ua/image/cache/catalog/CubeSum/sumka_dlya_mam_cuberomb_000-100x100.jpg", "Bags","2"),
-            Product("Ahong Лисички, 22 л", "https://mommys.com.ua/image/cache/catalog/Fun/9135644580_251991099-100x100.jpg", "Bags","0"))
-        _products.value = productsList
+        //создаем слушателя изменений в БД
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                Log.d(Constans.TAG, "WarehouseViewModel -> ValueEventListener")
+                var list = ArrayList<Product>()
+                // Здесь получаем список "детей" и проходимся по ним в цикле
+                for (data in dataSnapshot.children) {
+                    var product = data.getValue(Product::class.java)
+                    list.add(product as Product)
+                }
+                _products.value = list
+            }
 
-        //TODO здесь получаем список Товаров через FirestoreClass и применяем его ливдате через трай кетч
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting Post failed, log a message
+                Log.d(Constans.TAG, "WarehouseViewModel -> onCancelled")
+                // ...
+            }
+        })
     }
 }
