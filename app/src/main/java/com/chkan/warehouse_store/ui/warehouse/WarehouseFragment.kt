@@ -18,13 +18,12 @@ import com.chkan.warehouse_store.databinding.FragmentWhBinding
 
 class WarehouseFragment : Fragment() {
 
-    //private lateinit var binding: FragmentWhBinding
     private val viewModel: WarehouseViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        //binding = DataBindingUtil.inflate(inflater, R.layout.fragment_wh, container, false)
+
         val binding = FragmentWhBinding.inflate(inflater)
         //назначаем ресайклеру адаптер
         binding.rvWarehouse.adapter = ProductsAdapter()

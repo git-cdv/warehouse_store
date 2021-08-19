@@ -2,56 +2,71 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
         <variable
             name="product"
             type="com.chkan.warehouse_store.models.Product" />
     </data>
 
-<com.google.android.material.card.MaterialCardView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp">
-
     <LinearLayout
+        android:id="@+id/container_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        >
 
-        <ImageView
-            android:id="@+id/iv_item_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="centerCrop"
-            app:imageUrl="@{product.imageUrl}"
-            tools:src="@tools:sample/avatars"
-            />
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            app:cardBackgroundColor="@color/browser_actions_bg_grey">
 
-            <TextView
-                android:id="@+id/tv_item_name"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:text="@{product.name}"
-                tools:text="Название товара"
-                />
-            <TextView
-                android:id="@+id/tv_item_quantity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:text="@{product.quantity}"
-                tools:text="В наличии"
-                />
+                android:padding="4dp">
 
-        </LinearLayout>
+                <ImageView
+                    android:id="@+id/iv_item_image"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="16dp"
+                    android:scaleType="centerCrop"
+                    app:imageUrl="@{product.imageUrl}"
+                    tools:src="@tools:sample/avatars" />
 
+                <TextView
+                    android:id="@+id/tv_item_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_toEndOf="@+id/iv_item_image"
+                    android:layout_toStartOf="@+id/tv_item_quantity"
+                    android:lines="2"
+                    android:text="@{product.name}"
+                    tools:text="Название товара" />
+
+                <TextView
+                    android:id="@+id/tv_item_quantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="16dp"
+                    android:text="@{product.quantity}"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:text="25" />
+
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView>
 </layout>

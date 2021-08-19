@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
         <variable
@@ -10,18 +9,12 @@
             type="com.chkan.warehouse_store.ui.warehouse.WarehouseViewModel" />
     </data>
 
-    <FrameLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_warehouse"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.warehouse.WarehouseFragment">
+        android:scrollbars="vertical"
+        app:layoutManager="LinearLayoutManager"
+        app:listData="@{viewModel.products}" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_warehouse"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            app:listData="@{viewModel.products}"
-            app:layoutManager="LinearLayoutManager" />
-
-    </FrameLayout>
 </layout>
