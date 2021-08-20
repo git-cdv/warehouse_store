@@ -16,7 +16,7 @@ import com.chkan.warehouse_store.models.Product
  * Обновляются только те элементы, которые были изменены.
  */
 
-class ProductsAdapter: ListAdapter<Product,
+class ProductsAdapter(val clickListener:ProductListListener): ListAdapter<Product,
         ProductsAdapter.ProductViewHolder>(DiffCallback) {
 
     /**
@@ -28,10 +28,11 @@ class ProductsAdapter: ListAdapter<Product,
     class ProductViewHolder(
         private var binding: ListItemWhBinding
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(mProduct: Product) {
+        fun bind(mProduct: Product, clickListener: ProductListListener) {
             //где product название <data><variable> из list_item_wh.xml
             //т.е. какие вью мы с <variable> во list_item_wh.xml связали - такие и покажутся
             binding.product = mProduct
+            binding.clickListener = clickListener
             // Это важно, потому что это приводит к немедленному выполнению привязки данных,
             // что позволяет RecyclerView производить правильные измерения размера представления
             binding.executePendingBindings()
@@ -51,7 +52,7 @@ class ProductsAdapter: ListAdapter<Product,
 
     override fun onBindViewHolder(holder: ProductsAdapter.ProductViewHolder, position: Int) {
         val mProduct = getItem(position)
-        holder.bind(mProduct)
+        holder.bind(mProduct,clickListener)
     }
 
     /**
@@ -75,3 +76,8 @@ class ProductsAdapter: ListAdapter<Product,
     }
 
 }
+
+class ProductListListener(val clickListener: (id: Int) -> Unit) {
+    fun onClick(product: Product) = clickListener(product.id)
+}
+

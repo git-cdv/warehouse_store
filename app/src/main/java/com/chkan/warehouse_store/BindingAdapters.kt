@@ -1,6 +1,8 @@
 package com.chkan.warehouse_store
 
+import android.annotation.SuppressLint
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -30,3 +32,4 @@ import com.chkan.warehouse_store.models.Product
             }
         }
     }
+

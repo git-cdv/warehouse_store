@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.chkan.warehouse_store.R
+import com.chkan.warehouse_store.adapters.ProductListListener
 import com.chkan.warehouse_store.adapters.ProductsAdapter
 import com.chkan.warehouse_store.databinding.FragmentWhBinding
 
@@ -25,8 +27,9 @@ class WarehouseFragment : Fragment() {
     ): View? {
 
         val binding = FragmentWhBinding.inflate(inflater)
-        //назначаем ресайклеру адаптер
-        binding.rvWarehouse.adapter = ProductsAdapter()
+        //назначаем ресайклеру адаптер и слушатель кликов с обработкой в viewModel
+        binding.rvWarehouse.adapter = ProductsAdapter(ProductListListener { productId ->
+            viewModel.onProductClicked(productId) } )
         // Позволяет привязке данных наблюдать за LiveData в течение жизненного цикла этого фрагмента
         binding.lifecycleOwner = this
 

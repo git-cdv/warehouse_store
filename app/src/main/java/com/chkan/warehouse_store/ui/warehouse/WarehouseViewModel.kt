@@ -1,6 +1,7 @@
 package com.chkan.warehouse_store.ui.warehouse
 
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -30,18 +31,19 @@ class WarehouseViewModel : ViewModel() {
 
     private fun getProducts() {
         //TODO запускаем статус бар лоадера
-
         //создаем слушателя изменений в БД
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "WarehouseViewModel -> ValueEventListener")
-                var list = ArrayList<Product>()
+                val list : MutableList<Product> = mutableListOf()
                 // Здесь получаем список "детей" и проходимся по ним в цикле
                 for (data in dataSnapshot.children) {
                     var product = data.getValue(Product::class.java)
                     list.add(product as Product)
                 }
-                _products.value = list
+                //отфильтровываем с 0 остатком и сортируем по названию суммок
+                val sorted: List<Product> = list.filter { it.quantity!=0 }.sortedBy { it.name }
+                _products.value = sorted
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -50,5 +52,9 @@ class WarehouseViewModel : ViewModel() {
                 // ...
             }
         })
+    }
+
+    fun onProductClicked(id:Int){
+        Log.d(Constans.TAG, "onProductClicked -> $id")
     }
 }

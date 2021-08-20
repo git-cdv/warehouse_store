@@ -7,6 +7,10 @@
         <variable
             name="product"
             type="com.chkan.warehouse_store.models.Product" />
+
+        <variable
+            name="clickListener"
+            type="com.chkan.warehouse_store.adapters.ProductListListener" />
     </data>
 
     <LinearLayout
@@ -16,12 +20,13 @@
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        >
+        android:paddingEnd="16dp">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> clickListener.onClick(product)}"
+            >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -35,7 +40,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_marginStart="8dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="8dp"
                     android:scaleType="centerCrop"
                     app:imageUrl="@{product.imageUrl}"
                     tools:src="@tools:sample/avatars" />
@@ -52,8 +57,8 @@
                     android:layout_toStartOf="@+id/tv_item_quantity"
                     android:layout_toEndOf="@+id/iv_item_image"
                     android:lines="2"
-                    android:textColor="@color/brand_dark_blue"
                     android:text="@{product.name}"
+                    android:textColor="@color/brand_dark_blue"
                     tools:text="Название товара" />
 
                 <TextView
@@ -63,9 +68,10 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:layout_marginEnd="16dp"
-                    android:text="@{product.quantity}"
+                    android:text="@{Integer.toString(product.quantity)}"
                     android:textSize="20sp"
                     android:textStyle="bold"
+                    android:textColor="@color/brand_pink"
                     tools:text="25" />
 
             </RelativeLayout>
