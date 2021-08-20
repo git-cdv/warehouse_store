@@ -1,7 +1,6 @@
 package com.chkan.warehouse_store.ui.warehouse
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,6 +23,10 @@ class WarehouseViewModel : ViewModel() {
     val products : LiveData<List<Product>> = _products
     private val db: FirebaseDatabase = Firebase.database
     private val database: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
+    //для передачи состояния
+    private val _clickedId = MutableLiveData<Int>()
+    val clickedId: LiveData<Int> = _clickedId
+    var sorted: List<Product>?=null
 
     init {
         getProducts()
@@ -42,7 +45,7 @@ class WarehouseViewModel : ViewModel() {
                     list.add(product as Product)
                 }
                 //отфильтровываем с 0 остатком и сортируем по названию суммок
-                val sorted: List<Product> = list.filter { it.quantity!=0 }.sortedBy { it.name }
+                sorted = list.filter { it.quantity!=0 }.sortedBy { it.name }
                 _products.value = sorted
             }
 
@@ -55,6 +58,20 @@ class WarehouseViewModel : ViewModel() {
     }
 
     fun onProductClicked(id:Int){
-        Log.d(Constans.TAG, "onProductClicked -> $id")
+        _clickedId.value = id
+    }
+
+    fun onReturn(){
+        if(sorted!=null){
+            val value = sorted!!.filter { it.id==_clickedId.value }.get(0).quantity
+            database.child(_clickedId.value.toString()).child("quantity").setValue(value+1)
+        }
+    }
+
+    fun onSold(){
+        if(sorted!=null){
+        val value = sorted!!.filter { it.id==_clickedId.value }.get(0).quantity
+        database.child(_clickedId.value.toString()).child("quantity").setValue(value-1)
+        }
     }
 }

@@ -63,8 +63,8 @@ class ProductsAdapter(val clickListener:ProductListListener): ListAdapter<Produc
 
         //Этот метод вызывается, DiffUtil чтобы решить, представляют ли два объекта один и тот же элемент
         override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean {
-            //return oldItem.id == newItem.id
-            return true
+            return oldItem.id == newItem.id
+
         }
         /*
         * Этот метод вызывается, DiffUtil когда он хочет проверить, имеют ли два элемента одинаковые данные.

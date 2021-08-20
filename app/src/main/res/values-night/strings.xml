@@ -8,4 +8,8 @@
     <string name="user">User</string>
     <string name="warehouse">Склад</string>
     <string name="sales">Продажи</string>
+    <string name="question">Продано или возврат?</string>
+
+    <string name="sold">Продано</string>
+    <string name="returned">Возврат</string>
 </resources>
