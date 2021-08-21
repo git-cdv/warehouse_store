@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="question">Продано или возврат?</string>
+    <string name="question">Продано?</string>
 
     <string name="sold">Продано</string>
     <string name="returned">Возврат</string>

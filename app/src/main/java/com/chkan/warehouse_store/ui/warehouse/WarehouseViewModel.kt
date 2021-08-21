@@ -66,14 +66,6 @@ class WarehouseViewModel : ViewModel() {
         _clickedId.value = id
     }
 
-    fun onReturn(){
-        if(sorted!=null){
-            //находим и увеличиваем остаток товара в БД
-            val value = sorted!!.filter { it.id==_clickedId.value }.get(0).quantity
-            database.child(_clickedId.value.toString()).child("quantity").setValue(value+1)
-        }
-    }
-
     fun onSold(){
         val clickedId = _clickedId.value
         val product = sorted!!.filter { it.id==clickedId }.get(0)
@@ -85,10 +77,21 @@ class WarehouseViewModel : ViewModel() {
         val fmt: DateTimeFormatter = DateTimeFormat.forPattern("MMMMyy")
         val month = fmt.print(LocalDate.now())// формате августа21
 
-        val sale =
-            clickedId?.let { Product(it,product.name,product.imageUrl,product.category,1,month) }
+        //пытаюсь получить значение продаж по этому товару, если их нет - получаю null
+        database_sales.child(month).child(clickedId.toString()).child("quantity").get().addOnSuccessListener {
+            Log.d(Constans.TAG, "Got value ${it.value}")
+            if(it.value==null){
+                //если значения нет - записываем обьект с 1 продажей
+                database_sales.child(month).child(clickedId.toString()).setValue(Product(clickedId!!,product.name,product.imageUrl,product.category,1,month))
+            } else {
+                val value:Int = Integer.valueOf(it.value.toString())
+                //если значение уже есть - увеличиваем его и обновляем
+                database_sales.child(month).child(clickedId.toString()).child("quantity").setValue(value+1)
+            }
 
-        database_sales.child(month).child(clickedId.toString()).setValue(sale)
+        }.addOnFailureListener{
+            Log.d(Constans.TAG, "Error getting data", it)
+        }
 
     }
 }

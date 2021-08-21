@@ -17,7 +17,7 @@ class SalesViewModel : ViewModel() {
 
     //для хранения списка товаров
     private val _sales = MutableLiveData<List<Product>>()
-    val sales : LiveData<List<Product>> = _sales
+    val sales: LiveData<List<Product>> = _sales
     private val database: DatabaseReference = Firebase.database.reference
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
@@ -39,15 +39,15 @@ class SalesViewModel : ViewModel() {
         monthQuery.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "SalesViewModel -> ValueEventListener")
-                val list : MutableList<Product> = mutableListOf()
+                val list: MutableList<Product> = mutableListOf()
                 // Здесь получаем список "детей" и проходимся по ним в цикле
                 for (data in dataSnapshot.children) {
                     var sale = data.getValue(Product::class.java)
                     list.add(sale as Product)
                 }
                 //сортируем по названию сумок
-                list.sortedBy { it.name }
-                _sales.value = list
+                //list.sortedBy { it.name }
+                _sales.value = list.sortedBy { it.name }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -58,12 +58,26 @@ class SalesViewModel : ViewModel() {
         })
     }
 
-    fun onSalesClicked(id:Int){
+    fun onSalesClicked(id: Int) {
         _clickedId.value = id
     }
 
     fun onReturn() {
         Log.d(Constans.TAG, "SalesViewModel -> onReturn")
-    }
+        //убрать с продаж и добавить в остатки
+        //пытаюсь получить значение остатка по этому товару
+        database.child(Constans.KEY_DB_PRODUCTS).child(clickedId.value.toString()).child("quantity").get()
+            .addOnSuccessListener {
+                Log.d(Constans.TAG, "Got value ${it.value}")
 
+                val value: Int = Integer.valueOf(it.value.toString())
+                database.child(Constans.KEY_DB_PRODUCTS).child(clickedId.value.toString())
+                    .child("quantity").setValue(value + 1)
+
+            }.addOnFailureListener {
+            Log.d(Constans.TAG, "Error getting data", it)
+        }
+
+    }
 }
+

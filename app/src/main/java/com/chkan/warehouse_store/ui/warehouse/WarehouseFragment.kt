@@ -52,8 +52,8 @@ class WarehouseFragment : BaseFragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.question))
             .setCancelable(true)
-            .setNegativeButton(getString(R.string.returned)) { _, _ ->
-                viewModel.onReturn()
+            .setNegativeButton(getString(R.string.sale_cancel)) { _, _ ->
+
             }
             .setPositiveButton(getString(R.string.sold)) { _, _ ->
                 viewModel.onSold()
