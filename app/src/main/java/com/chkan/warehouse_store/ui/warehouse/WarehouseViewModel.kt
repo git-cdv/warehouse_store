@@ -9,6 +9,10 @@ import com.chkan.warehouse_store.utils.Constans
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
+
 
 /**
  * ViewModel отвечает за выполнение сетевого вызова для получения данных.
@@ -23,6 +27,7 @@ class WarehouseViewModel : ViewModel() {
     val products : LiveData<List<Product>> = _products
     private val db: FirebaseDatabase = Firebase.database
     private val database: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
+    private val database_sales: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
@@ -63,15 +68,27 @@ class WarehouseViewModel : ViewModel() {
 
     fun onReturn(){
         if(sorted!=null){
+            //находим и увеличиваем остаток товара в БД
             val value = sorted!!.filter { it.id==_clickedId.value }.get(0).quantity
             database.child(_clickedId.value.toString()).child("quantity").setValue(value+1)
         }
     }
 
     fun onSold(){
+        val clickedId = _clickedId.value
+        val product = sorted!!.filter { it.id==clickedId }.get(0)
         if(sorted!=null){
-        val value = sorted!!.filter { it.id==_clickedId.value }.get(0).quantity
-        database.child(_clickedId.value.toString()).child("quantity").setValue(value-1)
+        //находим и уменьшаем остаток товара в БД
+        database.child(clickedId.toString()).child("quantity").setValue(product.quantity-1)
         }
+        //записываем продажу в БД
+        val fmt: DateTimeFormatter = DateTimeFormat.forPattern("MMMMyy")
+        val month = fmt.print(LocalDate.now())// формате августа21
+
+        val sale =
+            clickedId?.let { Product(it,product.name,product.imageUrl,product.category,1,month) }
+
+        database_sales.child(month).child(clickedId.toString()).setValue(sale)
+
     }
 }

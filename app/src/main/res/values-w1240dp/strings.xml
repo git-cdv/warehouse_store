@@ -4,4 +4,7 @@
 
     <string name="sold">Продано</string>
     <string name="returned">Возврат</string>
+    <string name="sale_return">Возврат?</string>
+    <string name="yes">Да</string>
+    <string name="sale_cancel">Отмена</string>
 </resources>
