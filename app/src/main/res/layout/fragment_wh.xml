@@ -17,6 +17,7 @@
         app:layoutManager="LinearLayoutManager"
         app:listData="@{viewModel.products}"
         android:background="@color/brand_dark_blue"
+        android:paddingTop="4dp"
         />
 
 </layout>
