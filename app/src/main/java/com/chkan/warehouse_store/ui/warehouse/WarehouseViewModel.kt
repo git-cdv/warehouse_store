@@ -68,10 +68,10 @@ class WarehouseViewModel : ViewModel() {
 
     fun onSold(){
         val clickedId = _clickedId.value
-        val product = sorted!!.filter { it.id==clickedId }.get(0)
+        val product = sorted!!.find { it.id==_clickedId.value }!!
         if(sorted!=null){
         //находим и уменьшаем остаток товара в БД
-        database.child(clickedId.toString()).child("quantity").setValue(product.quantity-1)
+            database.child(clickedId.toString()).child("quantity").setValue(product.quantity-1)
         }
         //записываем продажу в БД
         val fmt: DateTimeFormatter = DateTimeFormat.forPattern("MMMMyy")

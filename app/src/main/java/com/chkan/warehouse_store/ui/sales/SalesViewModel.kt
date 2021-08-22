@@ -22,6 +22,7 @@ class SalesViewModel : ViewModel() {
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
+    private lateinit var month : String
 
     init {
         getSales()
@@ -31,7 +32,7 @@ class SalesViewModel : ViewModel() {
         //TODO запускаем статус бар лоадера
         //вытягиваем текущий месяц
         val fmt: DateTimeFormatter = DateTimeFormat.forPattern("MMMMyy")
-        val month = fmt.print(LocalDate.now())// формате августа21
+        month = fmt.print(LocalDate.now())// формате августа21
         //делаем выборку по текущему месяцу
         val monthQuery = database.child("sales").child(month)
 
@@ -46,7 +47,6 @@ class SalesViewModel : ViewModel() {
                     list.add(sale as Product)
                 }
                 //сортируем по названию сумок
-                //list.sortedBy { it.name }
                 _sales.value = list.sortedBy { it.name }
             }
 
@@ -64,7 +64,8 @@ class SalesViewModel : ViewModel() {
 
     fun onReturn() {
         Log.d(Constans.TAG, "SalesViewModel -> onReturn")
-        //убрать с продаж и добавить в остатки
+
+        // добавляем в остатках
         //пытаюсь получить значение остатка по этому товару
         database.child(Constans.KEY_DB_PRODUCTS).child(clickedId.value.toString()).child("quantity").get()
             .addOnSuccessListener {
@@ -77,6 +78,11 @@ class SalesViewModel : ViewModel() {
             }.addOnFailureListener {
             Log.d(Constans.TAG, "Error getting data", it)
         }
+         //убираем с продаж
+        //получаем текущее значение продаж
+        val quantity = _sales.value!!.find { it.id==_clickedId.value }!!.quantity
+        //где month - это выбранная текущая выборка месяца с БД
+        database.child(Constans.KEY_DB_SALES).child(month).child(clickedId.value.toString()).child("quantity").setValue(quantity-1)
 
     }
 }
