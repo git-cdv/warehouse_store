@@ -8,4 +8,7 @@
     <string name="yes">Да</string>
     <string name="sale_cancel">Отмена</string>
     <string name="please_wait">Please wait…</string>
+    <string name="filter_av">Остатки</string>
+    <string name="filter_null">Закончились</string>
+    <string name="filter_all">Весь товар</string>
 </resources>

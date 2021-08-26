@@ -39,21 +39,22 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
+    //полный список ассортимента
+    val list: MutableList<Product> = mutableListOf()
     var sorted: List<Product>? = null
 
     init {
-        getProducts()
+        loadProducts()
     }
 
-    private fun getProducts() {
+    private fun loadProducts() {
         //создаем слушателя изменений в БД
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "WarehouseViewModel -> ValueEventListener")
-                val list: MutableList<Product> = mutableListOf()
                 // Здесь получаем список "детей" и проходимся по ним в цикле
                 for (data in dataSnapshot.children) {
-                    var product = data.getValue(Product::class.java)
+                    val product = data.getValue(Product::class.java)
                     list.add(product as Product)
                 }
                 //отфильтровываем с 0 остатком и сортируем по названию суммок
@@ -121,4 +122,19 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
 
         }
     }
+
+    fun getProductsOutStock() {
+        //отфильтровываем с 0 остатком и сортируем по названию суммок
+       _products.value = list.filter { it.quantity == 0 }.sortedBy { it.name }
+    }
+
+    fun getProductsAll() {
+        //весь список и сортируем по названию суммок
+        _products.value = list.sortedBy { it.name }
+    }
+
+    fun getProductsStock() {
+        _products.value = list.filter { it.quantity != 0 }.sortedBy { it.name }
+    }
+
 }

@@ -1,10 +1,13 @@
 package com.chkan.warehouse_store.ui.warehouse
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.viewModels
 import com.chkan.warehouse_store.R
 import com.chkan.warehouse_store.adapters.ProductListListener
@@ -36,8 +39,26 @@ class WarehouseFragment : BaseFragment() {
 
         // Предоставление привязки доступа к WarehouseViewModel (xml олжна быть эта переменная)
         binding.viewModel = viewModel
+        binding.fab.setOnClickListener { view ->
+            showMenu(view)
+        }
 
         return binding.root
+    }
+
+    private fun showMenu(view: View) {
+        val popup = context?.let { PopupMenu(it,view) }
+        popup!!.inflate(R.menu.menu_wh)
+
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId){
+                R.id.filter_av -> viewModel.getProductsStock()
+                R.id.filter_null -> viewModel.getProductsOutStock()
+                R.id.filter_all -> viewModel.getProductsAll()
+            }
+            return@setOnMenuItemClickListener true
+        }
+        popup.show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
