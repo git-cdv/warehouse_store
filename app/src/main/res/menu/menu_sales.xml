@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/filter_current"
+        android:title="@string/filter_current"/>
+    <item android:id="@+id/filter_previous"
+        android:title="@string/filter_previous" />
+    <item android:id="@+id/filter_year"
+        android:title="@string/filter_year" />
+</menu>

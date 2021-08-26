@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,8 +33,26 @@ class SalesFragment : Fragment() {
 
         // Предоставление привязки доступа к WarehouseViewModel (xml олжна быть эта переменная)
         binding.viewModel = viewModel
+        binding.fabSales.setOnClickListener { view ->
+            showMenu(view)
+        }
 
         return binding.root
+    }
+
+    private fun showMenu(view: View) {
+        val popup = context?.let { PopupMenu(it,view) }
+        popup!!.inflate(R.menu.menu_sales)
+
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId){
+                R.id.filter_current -> viewModel.getSalesCurrentMonth()
+                R.id.filter_previous -> viewModel.getSalesPreviousMonth()
+                R.id.filter_year -> viewModel.getSalesCurrentYear()
+            }
+            return@setOnMenuItemClickListener true
+        }
+        popup.show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

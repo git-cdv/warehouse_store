@@ -19,4 +19,7 @@
     <string name="filter_av">Остатки</string>
     <string name="filter_null">Закончились</string>
     <string name="filter_all">Весь товар</string>
+    <string name="filter_current">Тек. месяц</string>
+    <string name="filter_previous">Пред. месяц</string>
+    <string name="filter_year">Тек. год</string>
 </resources>

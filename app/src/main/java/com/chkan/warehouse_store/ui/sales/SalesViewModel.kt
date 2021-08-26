@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.chkan.warehouse_store.models.Product
 import com.chkan.warehouse_store.utils.Constans
+import com.google.android.gms.tasks.Task
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -26,6 +27,8 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
+    val listMonthCur: MutableList<Product> = mutableListOf()
+    val listSales: MutableList<Product> = mutableListOf()
 
     init {
         getSales()
@@ -41,14 +44,13 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         monthQuery.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "SalesViewModel -> ValueEventListener")
-                val list: MutableList<Product> = mutableListOf()
                 // Здесь получаем список "детей" и проходимся по ним в цикле
                 for (data in dataSnapshot.children) {
                     var sale = data.getValue(Product::class.java)
-                    list.add(sale as Product)
+                    listMonthCur.add(sale as Product)
                 }
                 //сортируем по названию сумок и фильтрует по остаткам
-                _sales.value = list.sortedBy { it.name }.filter { it.quantity != 0 }
+                _sales.value = listMonthCur.sortedBy { it.name }.filter { it.quantity != 0 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -92,6 +94,39 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
                 database.child(Constans.KEY_DB_SALES).child("$year-$month-${clickedId.value}").child("quantity").setValue(quantity)
             }
         }
+
+    }
+
+    fun getSalesCurrentMonth() {
+        //сортируем по названию сумок и фильтрует по остаткам
+        _sales.value = listMonthCur.sortedBy { it.name }.filter { it.quantity != 0 }
+    }
+
+    fun getSalesPreviousMonth() {
+        val salesRef: DatabaseReference = Firebase.database.reference.child("sales")
+        val mMonth = LocalDate.now().monthOfYear - 1
+        Log.d(Constans.TAG, "getSalesPreviousMonth -> enter with month - $mMonth")
+        //вытягиваем текущий месяц
+        if (listSales.size > 0) {
+            _sales.value = listSales.sortedBy { it.name }.filter { it.month == mMonth }
+        } else {
+            //делаем выборку по предыдущему месяцу
+            salesRef.get().addOnSuccessListener {
+                Log.d(Constans.TAG, "getSalesPreviousMonth -> value - ${it.value}")
+                // Здесь получаем список "детей" и проходимся по ним в цикле
+                for (data in it.children) {
+                    var sale = data.getValue(Product::class.java)
+                    listSales.add(sale as Product)
+                }
+                _sales.value = listSales.sortedBy { it.name }.filter { it.month == mMonth }
+
+            }.addOnFailureListener {
+                Log.e("firebase", "Error getting data", it)
+            }
+        }
+    }
+
+    fun getSalesCurrentYear() {
 
     }
 }
