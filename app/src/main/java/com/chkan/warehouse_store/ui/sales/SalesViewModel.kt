@@ -1,6 +1,9 @@
 package com.chkan.warehouse_store.ui.sales
 
+import android.app.Application
 import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,7 +17,7 @@ import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
-class SalesViewModel : ViewModel() {
+class SalesViewModel(application: Application) : AndroidViewModel(application) {
 
     //для хранения списка товаров
     private val _sales = MutableLiveData<List<Product>>()
@@ -23,19 +26,16 @@ class SalesViewModel : ViewModel() {
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
-    private lateinit var month : String
 
     init {
         getSales()
     }
 
     private fun getSales() {
-        //TODO запускаем статус бар лоадера
         //вытягиваем текущий месяц
-        val fmt: DateTimeFormatter = DateTimeFormat.forPattern("MMMMyy")
-        month = fmt.print(LocalDate.now())// формате августа21
+        val month = LocalDate.now().monthOfYear
         //делаем выборку по текущему месяцу
-        val monthQuery = database.child("sales").child(month)
+        val monthQuery = database.child("sales").orderByChild("month").equalTo(month.toDouble())
 
         //создаем слушателя изменений в БД
         monthQuery.addValueEventListener(object : ValueEventListener {
@@ -52,9 +52,8 @@ class SalesViewModel : ViewModel() {
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                // Getting Post failed, log a message
-                Log.d(Constans.TAG, "SalesViewModel -> onCancelled")
-                // ...
+                Log.d(Constans.TAG, "SalesViewModel -> onCancelled - ${databaseError.details}")
+                Toast.makeText(getApplication(), "У вас нет доступа к данным", Toast.LENGTH_LONG).show()
             }
         })
     }
@@ -83,12 +82,16 @@ class SalesViewModel : ViewModel() {
                     Log.d(Constans.TAG, "Error getting data", it)
                 }
             //убираем с продаж
-            //получаем текущее значение продаж
-            val quantity = _sales.value!!.find { it.id==_clickedId.value }!!.quantity
+            //получаем текущее звено с продажами
+            val item = _sales.value!!.find { it.id==_clickedId.value }
             //где month - это выбранная текущая выборка месяца с БД
-            database.child(Constans.KEY_DB_SALES).child(month).child(clickedId.value.toString()).child("quantity").setValue(quantity-1)
+            if (item != null) {
+                val year = item.year
+                val month = item.month
+                val quantity = item.quantity-1
+                database.child(Constans.KEY_DB_SALES).child("$year-$month-${clickedId.value}").child("quantity").setValue(quantity)
+            }
         }
-
 
     }
 }

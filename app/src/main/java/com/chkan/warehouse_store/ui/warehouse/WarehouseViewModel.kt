@@ -1,6 +1,9 @@
 package com.chkan.warehouse_store.ui.warehouse
 
+import android.app.Application
 import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,7 +27,7 @@ import org.joda.time.format.DateTimeFormatter
  * для обновления интерфейса при изменении данных.
  */
 
-class WarehouseViewModel : ViewModel() {
+class WarehouseViewModel(application: Application) : AndroidViewModel(application) {
 
     //для хранения списка товаров
     private val _products = MutableLiveData<List<Product>>()
@@ -43,7 +46,6 @@ class WarehouseViewModel : ViewModel() {
     }
 
     private fun getProducts() {
-        //TODO запускаем статус бар лоадера
         //создаем слушателя изменений в БД
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -60,9 +62,8 @@ class WarehouseViewModel : ViewModel() {
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                // Getting Post failed, log a message
-                Log.d(Constans.TAG, "WarehouseViewModel -> onCancelled")
-                // ...
+                Log.d(Constans.TAG, "WarehouseViewModel -> onCancelled - ${databaseError.details}")
+                Toast.makeText(getApplication(), "У вас нет доступа к данным", Toast.LENGTH_LONG).show()
             }
         })
     }
@@ -87,29 +88,30 @@ class WarehouseViewModel : ViewModel() {
                     .setValue(product.quantity - 1)
             }
             //записываем продажу в БД
-            val fmt: DateTimeFormatter = DateTimeFormat.forPattern("MMMMyy")
-            val month = fmt.print(LocalDate.now())// формате августа21
+            val year = LocalDate.now().yearOfCentury
+            val month = LocalDate.now().monthOfYear// формате августа21
 
             //пытаюсь получить значение продаж по этому товару, если их нет - получаю null
-            database_sales.child(month).child(clickedId.toString()).child("quantity").get()
+            database_sales.child("$year-$month-$clickedId").child("quantity").get()
                 .addOnSuccessListener {
                     Log.d(Constans.TAG, "Got value ${it.value}")
                     if (it.value == null) {
                         //если значения нет - записываем обьект с 1 продажей
-                        database_sales.child(month).child(clickedId.toString()).setValue(
+                        database_sales.child("$year-$month-$clickedId").setValue(
                             Product(
                                 clickedId!!,
                                 product.name,
                                 product.imageUrl,
                                 product.category,
                                 1,
-                                month
+                                month,
+                                year
                             )
                         )
                     } else {
                         val value: Int = Integer.valueOf(it.value.toString())
                         //если значение уже есть - увеличиваем его и обновляем
-                        database_sales.child(month).child(clickedId.toString()).child("quantity")
+                        database_sales.child("$year-$month-$clickedId").child("quantity")
                             .setValue(value + 1)
                     }
 
