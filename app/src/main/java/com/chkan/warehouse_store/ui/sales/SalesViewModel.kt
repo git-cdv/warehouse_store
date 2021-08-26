@@ -103,25 +103,25 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getSalesPreviousMonth() {
-        val salesRef: DatabaseReference = Firebase.database.reference.child("sales")
-        val mMonth = LocalDate.now().monthOfYear - 1
-        Log.d(Constans.TAG, "getSalesPreviousMonth -> enter with month - $mMonth")
-        //вытягиваем текущий месяц
+
         if (listSales.size > 0) {
-            _sales.value = listSales.sortedBy { it.name }.filter { it.month == mMonth }
+            _sales.value = listSales.sortedBy { it.name }
         } else {
-            //делаем выборку по предыдущему месяцу
-            salesRef.get().addOnSuccessListener {
-                Log.d(Constans.TAG, "getSalesPreviousMonth -> value - ${it.value}")
-                // Здесь получаем список "детей" и проходимся по ним в цикле
+
+            val db: FirebaseDatabase = Firebase.database
+            val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
+            val mMonth = LocalDate.now().monthOfYear - 1
+            val prevQuery = salesRef.orderByChild("month").equalTo(mMonth.toDouble())
+            prevQuery.get().addOnSuccessListener {
+                Log.d(Constans.TAG, "getSalesPreviousMonth() -> dataSnapshot: - ${it.value} ")
                 for (data in it.children) {
                     var sale = data.getValue(Product::class.java)
                     listSales.add(sale as Product)
                 }
-                _sales.value = listSales.sortedBy { it.name }.filter { it.month == mMonth }
+                _sales.value = listSales.sortedBy { it.name }
 
             }.addOnFailureListener {
-                Log.e("firebase", "Error getting data", it)
+                Log.d(Constans.TAG, "Error getting data", it)
             }
         }
     }

@@ -40,7 +40,8 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
     //полный список ассортимента
-    val list: MutableList<Product> = mutableListOf()
+    var listFull: MutableList<Product> = mutableListOf()
+    //сортированный список
     var sorted: List<Product>? = null
 
     init {
@@ -52,11 +53,13 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "WarehouseViewModel -> ValueEventListener")
+                val list: MutableList<Product> = mutableListOf()
                 // Здесь получаем список "детей" и проходимся по ним в цикле
                 for (data in dataSnapshot.children) {
                     val product = data.getValue(Product::class.java)
                     list.add(product as Product)
                 }
+                listFull = list
                 //отфильтровываем с 0 остатком и сортируем по названию суммок
                 sorted = list.filter { it.quantity != 0 }.sortedBy { it.name }
                 _products.value = sorted
@@ -125,16 +128,16 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun getProductsOutStock() {
         //отфильтровываем с 0 остатком и сортируем по названию суммок
-       _products.value = list.filter { it.quantity == 0 }.sortedBy { it.name }
+       _products.value = listFull.filter { it.quantity == 0 }.sortedBy { it.name }
     }
 
     fun getProductsAll() {
         //весь список и сортируем по названию суммок
-        _products.value = list.sortedBy { it.name }
+        _products.value = listFull.sortedBy { it.name }
     }
 
     fun getProductsStock() {
-        _products.value = list.filter { it.quantity != 0 }.sortedBy { it.name }
+        _products.value = sorted
     }
 
 }
