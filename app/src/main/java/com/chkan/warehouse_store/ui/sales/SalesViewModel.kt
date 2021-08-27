@@ -23,10 +23,11 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     //для хранения списка товаров
     private val _sales = MutableLiveData<List<Product>>()
     val sales: LiveData<List<Product>> = _sales
-    private val database: DatabaseReference = Firebase.database.reference
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
+    private val db: FirebaseDatabase = Firebase.database
+    private val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
     val listMonthPrev: MutableList<Product> = mutableListOf()
     var listMonthCur: MutableList<Product> = mutableListOf()
 
@@ -38,7 +39,7 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         //вытягиваем текущий месяц
         val month = LocalDate.now().monthOfYear
         //делаем выборку по текущему месяцу
-        val monthQuery = database.child("sales").orderByChild("month").equalTo(month.toDouble())
+        val monthQuery = salesRef.orderByChild("month").equalTo(month.toDouble())
 
         //создаем слушателя изменений в БД
         monthQuery.addValueEventListener(object : ValueEventListener {
@@ -73,15 +74,16 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         //выбираем Dispatchers.IO потому что запросы в сеть
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
+
+            val productRef: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
             // добавляем в остатках
             //пытаюсь получить значение остатка по этому товару
-            database.child(Constans.KEY_DB_PRODUCTS).child(clickedId.value.toString()).child("quantity").get()
+            productRef.child(clickedId.value.toString()).child("quantity").get()
                 .addOnSuccessListener {
                     Log.d(Constans.TAG, "Got value ${it.value}")
 
                     val value: Int = Integer.valueOf(it.value.toString())
-                    database.child(Constans.KEY_DB_PRODUCTS).child(clickedId.value.toString())
-                        .child("quantity").setValue(value + 1)
+                    productRef.child(clickedId.value.toString()).child("quantity").setValue(value + 1)
 
                 }.addOnFailureListener {
                     Log.d(Constans.TAG, "Error getting data", it)
@@ -94,7 +96,7 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
                 val year = item.year
                 val month = item.month
                 val quantity = item.quantity-1
-                database.child(Constans.KEY_DB_SALES).child("$year-$month-${clickedId.value}").child("quantity").setValue(quantity)
+                salesRef.child("$year-$month-${clickedId.value}").child("quantity").setValue(quantity)
             }
         }
 
@@ -110,9 +112,6 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         if (listMonthPrev.size > 0) {
             _sales.value = listMonthPrev.sortedBy { it.name }
         } else {
-
-            val db: FirebaseDatabase = Firebase.database
-            val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
             val mMonth = LocalDate.now().monthOfYear - 1
             val prevQuery = salesRef.orderByChild("month").equalTo(mMonth.toDouble())
             prevQuery.get().addOnSuccessListener {
