@@ -27,8 +27,8 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
-    val listMonthCur: MutableList<Product> = mutableListOf()
-    val listSales: MutableList<Product> = mutableListOf()
+    val listMonthPrev: MutableList<Product> = mutableListOf()
+    var listMonthCur: MutableList<Product> = mutableListOf()
 
     init {
         getSales()
@@ -44,13 +44,16 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         monthQuery.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "SalesViewModel -> ValueEventListener")
+                val list: MutableList<Product> = mutableListOf()
                 // Здесь получаем список "детей" и проходимся по ним в цикле
                 for (data in dataSnapshot.children) {
                     var sale = data.getValue(Product::class.java)
-                    listMonthCur.add(sale as Product)
+                    list.add(sale as Product)
                 }
+                //сохраняем в общий лист для переиспользования
+                listMonthCur = list
                 //сортируем по названию сумок и фильтрует по остаткам
-                _sales.value = listMonthCur.sortedBy { it.name }.filter { it.quantity != 0 }
+                _sales.value = list.sortedBy { it.name }.filter { it.quantity != 0 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -104,8 +107,8 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getSalesPreviousMonth() {
 
-        if (listSales.size > 0) {
-            _sales.value = listSales.sortedBy { it.name }
+        if (listMonthPrev.size > 0) {
+            _sales.value = listMonthPrev.sortedBy { it.name }
         } else {
 
             val db: FirebaseDatabase = Firebase.database
@@ -116,9 +119,9 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(Constans.TAG, "getSalesPreviousMonth() -> dataSnapshot: - ${it.value} ")
                 for (data in it.children) {
                     var sale = data.getValue(Product::class.java)
-                    listSales.add(sale as Product)
+                    listMonthPrev.add(sale as Product)
                 }
-                _sales.value = listSales.sortedBy { it.name }
+                _sales.value = listMonthPrev.sortedBy { it.name }
 
             }.addOnFailureListener {
                 Log.d(Constans.TAG, "Error getting data", it)
