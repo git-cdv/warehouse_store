@@ -33,8 +33,8 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
     private val _products = MutableLiveData<List<Product>>()
     val products: LiveData<List<Product>> = _products
     private val db: FirebaseDatabase = Firebase.database
-    private val database: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
-    private val database_sales: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
+    private val productRef: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
+    private val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
 
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
@@ -50,7 +50,7 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun loadProducts() {
         //создаем слушателя изменений в БД
-        database.addValueEventListener(object : ValueEventListener {
+        productRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.d(Constans.TAG, "WarehouseViewModel -> ValueEventListener")
                 val list: MutableList<Product> = mutableListOf()
@@ -88,7 +88,7 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
             val product = sorted!!.find { it.id == _clickedId.value }!!
             if (sorted != null) {
                 //находим и уменьшаем остаток товара в БД
-                database.child(clickedId.toString()).child("quantity")
+                productRef.child(clickedId.toString()).child("quantity")
                     .setValue(product.quantity - 1)
             }
             //записываем продажу в БД
@@ -96,12 +96,12 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
             val month = LocalDate.now().monthOfYear// формате августа21
 
             //пытаюсь получить значение продаж по этому товару, если их нет - получаю null
-            database_sales.child("$year-$month-$clickedId").child("quantity").get()
+            salesRef.child("$year-$month-$clickedId").child("quantity").get()
                 .addOnSuccessListener {
                     Log.d(Constans.TAG, "Got value ${it.value}")
                     if (it.value == null) {
                         //если значения нет - записываем обьект с 1 продажей
-                        database_sales.child("$year-$month-$clickedId").setValue(
+                        salesRef.child("$year-$month-$clickedId").setValue(
                             Product(
                                 clickedId!!,
                                 product.name,
@@ -115,7 +115,7 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
                     } else {
                         val value: Int = Integer.valueOf(it.value.toString())
                         //если значение уже есть - увеличиваем его и обновляем
-                        database_sales.child("$year-$month-$clickedId").child("quantity")
+                        salesRef.child("$year-$month-$clickedId").child("quantity")
                             .setValue(value + 1)
                     }
 
