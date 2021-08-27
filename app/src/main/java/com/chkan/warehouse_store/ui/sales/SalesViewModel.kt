@@ -30,12 +30,14 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     private val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
     val listMonthPrev: MutableList<Product> = mutableListOf()
     var listMonthCur: MutableList<Product> = mutableListOf()
+    var listSumYearCur: MutableList<Product> = mutableListOf()
 
     init {
         getSales()
     }
 
     private fun getSales() {
+        Log.d(Constans.TAG, "getSales()")
         //вытягиваем текущий месяц
         val month = LocalDate.now().monthOfYear
         //делаем выборку по текущему месяцу
@@ -52,7 +54,7 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
                     list.add(sale as Product)
                 }
                 //сохраняем в общий лист для переиспользования
-                listMonthCur = list
+                listMonthCur = ArrayList(list)
                 //сортируем по названию сумок и фильтрует по остаткам
                 _sales.value = list.sortedBy { it.name }.filter { it.quantity != 0 }
             }
@@ -103,7 +105,7 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getSalesCurrentMonth() {
-        //сортируем по названию сумок и фильтрует по остаткам
+        Log.d(Constans.TAG, "getSalesCurrentMonth() -> listMonthCur: - ${listMonthCur.size} ")
         _sales.value = listMonthCur.sortedBy { it.name }.filter { it.quantity != 0 }
     }
 
@@ -130,6 +132,49 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getSalesCurrentYear() {
 
+        if (listSumYearCur.size > 0) {
+            _sales.value = listSumYearCur.sortedBy { it.name }
+        } else {
+
+            val mYear = LocalDate.now().yearOfCentury
+            val curYearQuery = salesRef.orderByChild("year").equalTo(mYear.toDouble())
+            curYearQuery.get().addOnSuccessListener {
+                Log.d(Constans.TAG, "getSalesCurrentYear() -> dataSnapshot: - ${it.value} ")
+                val list: MutableList<Product> = mutableListOf()
+                for (data in it.children) {
+                    var sale = data.getValue(Product::class.java)
+                    list.add(sale as Product)
+                }
+
+                //пока размер списка больше нуля перебираем его
+                while(list.size>0){
+                    //берем первый id и фильтруем по нем
+                    val filtered = list.filter { it.id==list[0].id }
+                    //если элемент 1 сразу добавляем его в listSum и удаляем из list
+                    if (filtered.size==1){
+                        listSumYearCur.add(filtered[0])
+                        list.remove(filtered[0])
+                    } else {
+                        var count = 0
+                        //если элементов несколько - перебираем и плюсуем их quantity в обьект-бланк
+                        for (product in filtered) {
+                            count += product.quantity
+                        }
+                        val blankProduct = filtered[0]
+                        blankProduct.quantity=count
+                        //добавляем clearProduct в listSum и удаляем filtered из list
+                        listSumYearCur.add(blankProduct)
+                        list.removeAll(filtered)
+                    }
+
+                }
+
+                _sales.value = listSumYearCur.sortedBy { it.name }.filter { it.quantity != 0 }
+
+            }.addOnFailureListener {
+                Log.d(Constans.TAG, "Error getting data", it)
+            }
+        }
     }
 }
 

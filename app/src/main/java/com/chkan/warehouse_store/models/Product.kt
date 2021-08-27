@@ -9,7 +9,7 @@ open class Product (
     val name: String = "",
     val imageUrl: String = "",
     val category: String = "",
-    val quantity: Int = 0,
+    var quantity: Int = 0,
     val month: Int = 0,
     val year: Int = 0
 ) : Parcelable

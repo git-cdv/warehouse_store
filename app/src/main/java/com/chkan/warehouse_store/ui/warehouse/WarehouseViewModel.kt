@@ -34,8 +34,6 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
     val products: LiveData<List<Product>> = _products
     private val db: FirebaseDatabase = Firebase.database
     private val productRef: DatabaseReference = db.getReference(Constans.KEY_DB_PRODUCTS)
-    private val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
-
     //для передачи состояния
     private val _clickedId = MutableLiveData<Int>()
     val clickedId: LiveData<Int> = _clickedId
@@ -83,7 +81,7 @@ class WarehouseViewModel(application: Application) : AndroidViewModel(applicatio
 
         val scope = CoroutineScope(Job() + Dispatchers.IO)
         scope.launch {
-
+            val salesRef: DatabaseReference = db.getReference(Constans.KEY_DB_SALES)
             val clickedId = _clickedId.value
             val product = sorted!!.find { it.id == _clickedId.value }!!
             if (sorted != null) {
